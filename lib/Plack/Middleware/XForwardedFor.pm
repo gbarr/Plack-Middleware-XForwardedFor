@@ -61,7 +61,7 @@ Plack::Middleware::XForwardedFor - Plack middleware to handle X-Forwarded-For he
 =head1 DESCRIPTION
 
 C<Plack::Middleware::XForwardedFor> will look for C<X-Forwarded-For>
-header in the incomming request and change C<REMOTE_ADDR> to the
+header in the incoming request and change C<REMOTE_ADDR> to the
 real client IP
 
 =head1 PARAMETERS
@@ -70,7 +70,7 @@ real client IP
 
 =item trust
 
-If not spcified then all addressed are trusted and C<REMOTE_ADDR> will be set to the
+If not specified then all addressed are trusted and C<REMOTE_ADDR> will be set to the
 first IP in the C<X-Forwarded-For> header.
 
 If given, it should be a list of IPs or Netmasks that can be trusted. Starting with the IP
