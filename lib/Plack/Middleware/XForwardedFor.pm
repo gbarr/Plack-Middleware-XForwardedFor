@@ -4,7 +4,7 @@ package Plack::Middleware::XForwardedFor;
 use strict;
 use warnings;
 use parent qw(Plack::Middleware);
-use Plack::Util::Accessor qw( trust );
+use Plack::Util::Accessor qw( trust header );
 use Regexp::Common qw /net/;
 use Net::Netmask;
 
@@ -15,12 +15,21 @@ sub prepare_app {
     my @trust = map { Net::Netmask->new($_) } ref($trust) ? @$trust : ($trust);
     $self->trust(\@trust);
   }
+  if (my $header = $self->header) {
+    $header = uc $header;
+    $header =~ s/-/_/g;
+    $header = "HTTP_$header" unless $header =~ m/^HTTP_/;
+    $self->header($header);
+  }
+  else {
+    $self->header('HTTP_X_FORWARDED_FOR') unless $self->header();
+  }
 }
 
 sub call {
   my ($self, $env) = @_;
 
-  my @forward = ($env->{HTTP_X_FORWARDED_FOR} || '') =~ /\b($RE{net}{IPv4})\b/g;
+  my @forward = ($env->{ $self->header() } || '') =~ /\b($RE{net}{IPv4})\b/g;
 
   if (@forward) {
     my $addr = $env->{REMOTE_ADDR};
@@ -76,6 +85,12 @@ first IP in the C<X-Forwarded-For> header.
 If given, it should be a list of IPs or Netmasks that can be trusted. Starting with the IP
 of the client in C<REMOTE_ADDR> then the IPs in the C<X-Forwarded-For> header from right to left.
 The first untrusted IP found is set to be C<REMOTE_ADDR>
+
+=item header
+
+If you'd like to check for a header other than C<X-Forwarded-For>, then use this parameter.
+It will automatically clean up the header name to match what's in C<$env>, so
+both C<X-Your-Forwarding-Header> and C<HTTP_X_YOUR_FORWARDING_HEADER> are valid.
 
 =back
 
