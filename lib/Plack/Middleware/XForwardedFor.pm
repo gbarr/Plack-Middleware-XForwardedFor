@@ -17,7 +17,7 @@ sub prepare_app {
   }
   if (my $header = $self->header) {
     $header = uc $header;
-    $header = "HTTP_$header" unless $header =~ m/HTTP_/i;
+    $header = "HTTP_$header" unless $header =~ m/^HTTP_/;
     $header =~ s/-/_/g;
     $self->header($header);
   }
