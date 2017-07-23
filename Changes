@@ -1,5 +1,6 @@
 {{$NEXT}}
   * Support IPv6 (use Net::IP instead of Net::Netmask and Regexp::Common)
+  * Support IPv4 addresses mapped to IPv6 ("::ffff:10.0.0.1")
 
 0.103060 -- Mon Nov 01 19:16:50 CDT 2010
   * Initial Release
