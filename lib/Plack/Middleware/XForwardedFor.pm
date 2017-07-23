@@ -4,15 +4,15 @@ package Plack::Middleware::XForwardedFor;
 use strict;
 use warnings;
 use parent qw(Plack::Middleware);
-use Plack::Util::Accessor qw( trust );
-use Regexp::Common qw /net/;
-use Net::Netmask;
+use Plack::Util::Accessor qw(trust);
+use Regexp::Common qw(net);
+use Net::IP qw();
 
 sub prepare_app {
   my $self = shift;
 
   if (my $trust = $self->trust) {
-    my @trust = map { Net::Netmask->new($_) } ref($trust) ? @$trust : ($trust);
+    my @trust = map { Net::IP->new($_) } ref($trust) ? @$trust : ($trust);
     $self->trust(\@trust);
   }
 }
@@ -20,7 +20,7 @@ sub prepare_app {
 sub call {
   my ($self, $env) = @_;
 
-  my @forward = ($env->{HTTP_X_FORWARDED_FOR} || '') =~ /\b($RE{net}{IPv4})\b/g;
+  my @forward = (split(/,\s*/, ($env->{HTTP_X_FORWARDED_FOR} || '')));
 
   if (@forward) {
     my $addr = $env->{REMOTE_ADDR};
@@ -28,7 +28,8 @@ sub call {
     ADDR: {
         if (my $next = pop @forward) {
           foreach my $netmask (@$trust) {
-            if ($netmask->match($addr)) {
+            my $ip = Net::IP->new($addr) or redo ADDR;
+            if ($netmask->overlaps($ip)) {
               $addr = $next;
               redo ADDR;
             }
@@ -81,7 +82,7 @@ The first untrusted IP found is set to be C<REMOTE_ADDR>
 
 =head1 SEE ALSO
 
-L<Plack::Middleware>, L<Net::Netmask>
+L<Plack::Middleware>, L<Net::IP>
 
 =head1 AUTHOR
 
