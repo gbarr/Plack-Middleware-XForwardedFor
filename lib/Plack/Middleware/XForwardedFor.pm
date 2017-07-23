@@ -20,10 +20,14 @@ sub prepare_app {
 sub call {
   my ($self, $env) = @_;
 
-  my @forward = (split(/,\s*/, ($env->{HTTP_X_FORWARDED_FOR} || '')));
+  my @forward =
+    map { s/^::ffff://; $_ }
+    (split(/,\s*/, ($env->{HTTP_X_FORWARDED_FOR} || '')));
 
   if (@forward) {
     my $addr = $env->{REMOTE_ADDR};
+    $addr =~ s/^::ffff://;
+
     if (my $trust = $self->trust) {
     ADDR: {
         if (my $next = pop @forward) {
