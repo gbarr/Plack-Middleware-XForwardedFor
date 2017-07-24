@@ -5,7 +5,6 @@ use strict;
 use warnings;
 use parent qw(Plack::Middleware);
 use Plack::Util::Accessor qw(trust);
-use Regexp::Common qw(net);
 use Net::IP qw();
 
 sub prepare_app {
