@@ -24,7 +24,7 @@ sub call {
     (split(/,\s*/, ($env->{HTTP_X_FORWARDED_FOR} || '')));
 
   if (@forward) {
-    my $addr = $env->{REMOTE_ADDR};
+    my $addr = $env->{REMOTE_ADDR} || '';
     $addr =~ s/^::ffff://;
 
     if (my $trust = $self->trust) {

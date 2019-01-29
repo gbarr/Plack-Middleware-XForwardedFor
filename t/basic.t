@@ -66,4 +66,21 @@ foreach my $env (@tests) {
   build_handler(trust => $env->{__trust})->($env);
 }
 
+ok(
+  eval {
+    local $SIG{__WARN__} = sub {
+      print STDERR $_[0];
+      die "Warning: " . $_[0];
+    };
+
+    build_handler()->(
+      { REMOTE_ADDR          => undef,
+        HTTP_X_FORWARDED_FOR => "9.8.7.6",
+        __expect             => "9.8.7.6",
+      }
+    )
+  },
+  'No warning when REMOTE_ADDR is undef, such as when a Unix socket is used'
+);
+
 done_testing();
